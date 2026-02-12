@@ -124,33 +124,21 @@ def main():
     print(f"  {' '.join(cmd)}")
     print()
     print("=" * 60)
+    print("Launching mitmweb (output below):")
+    print("=" * 60)
     sys.stdout.flush()
     
-    # Start mitmweb and stream its output
+    # Start mitmweb WITHOUT capturing output - let it inherit our stdout/stderr
+    # This way Railway logs will see everything directly
     try:
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            bufsize=1
-        )
+        returncode = subprocess.call(cmd)
         
-        print("mitmweb process started, PID:", process.pid)
-        print("Streaming output:")
-        print("=" * 60)
-        sys.stdout.flush()
-        
-        # Stream output line by line
-        for line in process.stdout:
-            print(line, end='')
-            sys.stdout.flush()
-            
-        # Wait for process to complete
-        returncode = process.wait()
+        # If we get here, mitmweb exited
         if returncode != 0:
             print(f"\nERROR: mitmweb exited with code {returncode}", file=sys.stderr)
             sys.exit(returncode)
+        else:
+            print("\nmitmweb exited normally")
             
     except FileNotFoundError:
         print("ERROR: mitmweb not found!", file=sys.stderr)
