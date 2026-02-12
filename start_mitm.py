@@ -33,8 +33,8 @@ def get_local_ip():
         return "127.0.0.1"
 
 def main():
-    # Check if running on Railway (has PORT environment variable)
-    railway_port = os.getenv('PORT')
+    # Check if running on Railway (has PORT or RAILWAY_TCP_APPLICATION_PORT environment variable)
+    railway_port = os.getenv('PORT') or os.getenv('RAILWAY_TCP_APPLICATION_PORT')
     
     if railway_port:
         # Railway deployment mode
