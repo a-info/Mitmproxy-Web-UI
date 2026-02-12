@@ -9,6 +9,10 @@ import sys
 import socket
 import os
 
+# Force unbuffered output for Railway logs
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
 def find_free_port(start=8080, end=8090):
     """Find first available port in range"""
     for port in range(start, end):
