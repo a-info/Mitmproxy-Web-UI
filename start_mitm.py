@@ -84,15 +84,24 @@ def main():
         "--ssl-insecure"
     ]
     
+    print(f"Starting mitmweb with command:")
+    print(f"  {' '.join(cmd)}")
+    print()
+    sys.stdout.flush()
+    
     try:
-        subprocess.run(cmd)
+        # Run with output forwarded to stdout/stderr
+        subprocess.run(cmd, check=True)
     except FileNotFoundError:
-        print("Error: mitmweb not found!")
-        print("Install: pip install mitmproxy==10.1.5")
-        if not railway_port:  # Only wait for input in local mode
-            input("\nPress Enter to exit...")
+        print("ERROR: mitmweb not found!", file=sys.stderr)
+        print("This should not happen in Docker. Check Dockerfile.", file=sys.stderr)
+        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: mitmweb exited with code {e.returncode}", file=sys.stderr)
+        sys.exit(e.returncode)
     except KeyboardInterrupt:
         print("\n\nStopped.")
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
