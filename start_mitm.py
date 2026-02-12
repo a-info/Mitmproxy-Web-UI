@@ -35,7 +35,8 @@ def main():
     if railway_port:
         # Railway deployment mode
         web_port = int(railway_port)
-        proxy_port = 8080  # Internal proxy port
+        # Use a different port for proxy, offset from web port
+        proxy_port = web_port + 1000  # e.g., if web_port=8080, proxy=9080
         web_host = "0.0.0.0"  # Listen on all interfaces for Railway
         
         print("=" * 60)
@@ -43,7 +44,7 @@ def main():
         print("=" * 60)
         print()
         print(f"Web UI Port:    {web_port} (Railway assigned)")
-        print(f"Proxy Port:     {proxy_port} (internal)")
+        print(f"Proxy Port:     {proxy_port} (dynamic)")
         print(f"Web Host:       {web_host}")
         print("=" * 60)
         print()
