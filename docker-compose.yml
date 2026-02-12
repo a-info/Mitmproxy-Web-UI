@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mitmproxy:
+    build: .
+    container_name: mitm-proxy
+    ports:
+      - "8080:8080"   # Proxy port
+      - "8081:8081"   # Web UI port
+    environment:
+      - MITMWEB_HOST=0.0.0.0
+      - MITMWEB_PORT=8081
+      - PROXY_PORT=8080
+    volumes:
+      - mitm-data:/root/.mitmproxy
+    restart: unless-stopped
+
+volumes:
+  mitm-data:
