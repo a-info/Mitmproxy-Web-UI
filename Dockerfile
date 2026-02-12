@@ -1,7 +1,10 @@
-# Dockerfile for MITM Proxy Web UI on Realway.com
-# This builds and runs mitmproxy with default mitmweb interface
+# Dockerfile for MITM Proxy Web UI on Railway
+# Uses start_mitm.py for dynamic PORT configuration
 
 FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -14,19 +17,11 @@ RUN pip install --no-cache-dir mitmproxy==10.1.5
 # Create directory for mitmproxy data
 RUN mkdir -p /root/.mitmproxy
 
-# Expose proxy port and web UI port
-EXPOSE 8080 8081
+# Copy the start script
+COPY start_mitm.py /app/
 
-# Set environment variables
-ENV MITMWEB_HOST=0.0.0.0
-ENV MITMWEB_PORT=8081
-ENV PROXY_PORT=8080
+# Expose proxy port (web UI port is dynamic via $PORT)
+EXPOSE 8080
 
-# Start mitmweb (proxy + web UI)
-CMD mitmweb \
-    --mode regular@0.0.0.0:8080 \
-    --web-host 0.0.0.0 \
-    --web-port 8081 \
-    --no-web-open-browser \
-    --ssl-insecure \
-    --set confdir=/root/.mitmproxy
+# Start using python script which reads PORT env variable
+CMD ["python3", "/app/start_mitm.py"]
