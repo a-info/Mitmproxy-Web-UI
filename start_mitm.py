@@ -89,14 +89,35 @@ def main():
         print("=" * 60)
         print()
     
-    # Run mitmweb
+    # First, verify mitmweb is installed and working
+    print("=" * 60)
+    print("Verifying mitmweb installation...")
+    sys.stdout.flush()
+    
+    try:
+        version_result = subprocess.run(
+            ["mitmweb", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        print(f"mitmweb version: {version_result.stdout.strip()}")
+        print("✓ mitmweb found and working")
+    except Exception as e:
+        print(f"WARNING: Could not verify mitmweb: {e}")
+    
+    print("=" * 60)
+    sys.stdout.flush()
+    
+    # Run mitmweb with verbose output
     cmd = [
         "mitmweb",
         "--mode", f"regular@0.0.0.0:{proxy_port}",
         "--web-host", web_host,
         "--web-port", str(web_port),
         "--no-web-open-browser",
-        "--ssl-insecure"
+        "--ssl-insecure",
+        "--set", "termlog_verbosity=info"  # Add verbose logging
     ]
     
     print(f"Starting mitmweb with command:")
