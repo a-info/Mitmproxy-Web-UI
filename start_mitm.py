@@ -102,18 +102,43 @@ def main():
     print(f"Starting mitmweb with command:")
     print(f"  {' '.join(cmd)}")
     print()
+    print("=" * 60)
     sys.stdout.flush()
     
-    # Use exec to replace this process with mitmweb
-    # This ensures all output goes directly to Railway logs
+    # Start mitmweb and stream its output
     try:
-        os.execvp(cmd[0], cmd)
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            bufsize=1
+        )
+        
+        print("mitmweb process started, PID:", process.pid)
+        print("Streaming output:")
+        print("=" * 60)
+        sys.stdout.flush()
+        
+        # Stream output line by line
+        for line in process.stdout:
+            print(line, end='')
+            sys.stdout.flush()
+            
+        # Wait for process to complete
+        returncode = process.wait()
+        if returncode != 0:
+            print(f"\nERROR: mitmweb exited with code {returncode}", file=sys.stderr)
+            sys.exit(returncode)
+            
     except FileNotFoundError:
         print("ERROR: mitmweb not found!", file=sys.stderr)
         print("This should not happen in Docker. Check Dockerfile.", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"ERROR: Failed to start mitmweb: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == "__main__":
