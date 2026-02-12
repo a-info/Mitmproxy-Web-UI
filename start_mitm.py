@@ -43,6 +43,17 @@ def main():
         proxy_port = web_port + 1000  # e.g., if web_port=8080, proxy=9080
         web_host = "0.0.0.0"  # Listen on all interfaces for Railway
         
+        # Try to detect Railway public URL
+        railway_public_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN')
+        railway_static_url = os.getenv('RAILWAY_STATIC_URL')
+        
+        if railway_public_domain:
+            web_url = f"https://{railway_public_domain}"
+        elif railway_static_url:
+            web_url = railway_static_url
+        else:
+            web_url = "https://[your-railway-domain].up.railway.app"
+        
         print("=" * 60)
         print("MITM Proxy Web UI - Railway Deployment")
         print("=" * 60)
@@ -50,8 +61,12 @@ def main():
         print(f"Web UI Port:    {web_port} (Railway assigned)")
         print(f"Proxy Port:     {proxy_port} (dynamic)")
         print(f"Web Host:       {web_host}")
+        print()
+        print("🌐 Web UI URL:")
+        print(f"   {web_url}")
         print("=" * 60)
         print()
+        sys.stdout.flush()
     else:
         # Local development mode
         proxy_port = find_free_port(8080, 8090) or 8082
@@ -89,19 +104,17 @@ def main():
     print()
     sys.stdout.flush()
     
+    # Use exec to replace this process with mitmweb
+    # This ensures all output goes directly to Railway logs
     try:
-        # Run with output forwarded to stdout/stderr
-        subprocess.run(cmd, check=True)
+        os.execvp(cmd[0], cmd)
     except FileNotFoundError:
         print("ERROR: mitmweb not found!", file=sys.stderr)
         print("This should not happen in Docker. Check Dockerfile.", file=sys.stderr)
         sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"ERROR: mitmweb exited with code {e.returncode}", file=sys.stderr)
-        sys.exit(e.returncode)
-    except KeyboardInterrupt:
-        print("\n\nStopped.")
-        sys.exit(0)
+    except Exception as e:
+        print(f"ERROR: Failed to start mitmweb: {e}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
